@@ -11,7 +11,7 @@ import pandas as pd
 # -----------------------------------------------------------------------
 # CONFIG
 # -----------------------------------------------------------------------
-st.set_page_config(page_title="Calculateur Financier Gazier", page_icon="⛽", layout="wide")
+st.set_page_config(page_title="Petroleum Economics calculator", page_icon="⛽", layout="wide")
 
 st.markdown("""
 <style>
@@ -29,7 +29,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("⛽ Calculateur Financier — Projet Gazier")
+st.title("⛽ Petroleum Economics calculator")
 st.caption("VAN · TRI · Payback · Cash-flow actualisé")
 
 # -----------------------------------------------------------------------
