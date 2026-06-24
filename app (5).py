@@ -349,46 +349,19 @@ st.divider()
 # -----------------------------------------------------------------------
 # CHART HELPERS
 # -----------------------------------------------------------------------
-# Spread out year ticks so labels never collide on long projects.
-if project_life <= 15:
-    tick_step = 1
-elif project_life <= 30:
-    tick_step = 2
-else:
-    tick_step = 5
-
-# Only print value labels directly on charts when there's room for them.
-show_labels = project_life <= 25
-
-
 def style_layout(fig, title, xlabel, ylabel):
     fig.update_layout(
         template=COLORS["template"],
-        height=480,
-        title=dict(text=title, font=dict(size=20, color=COLORS["text"])),
-        font=dict(family="Inter, sans-serif", color=COLORS["text"], size=14),
-        xaxis=dict(
-            title=dict(text=xlabel, font=dict(size=15, color=COLORS["text"])),
-            tickfont=dict(size=14, color=COLORS["text"]),
-            gridcolor=COLORS["grid"], zeroline=False,
-            dtick=tick_step, tick0=0,
-            showline=True, linecolor=COLORS["grid"], linewidth=1,
-        ),
-        yaxis=dict(
-            title=dict(text=ylabel, font=dict(size=15, color=COLORS["text"])),
-            tickfont=dict(size=14, color=COLORS["text"]),
-            gridcolor=COLORS["grid"], zeroline=False,
-            tickformat=",.1f", ticksuffix="  ", separatethousands=True,
-        ),
+        height=450,
+        title=dict(text=title, font=dict(size=18)),
+        font=dict(family="Inter, sans-serif", color=COLORS["text"]),
+        xaxis=dict(title=xlabel, gridcolor=COLORS["grid"], zeroline=False),
+        yaxis=dict(title=ylabel, gridcolor=COLORS["grid"], zeroline=False),
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(t=72, l=72, r=30, b=56),
+        margin=dict(t=64, l=48, r=24, b=44),
         hovermode="x unified",
-        hoverlabel=dict(
-            font=dict(size=15, family="Inter, sans-serif", color=COLORS["text"]),
-            bgcolor=COLORS["card_start"], bordercolor=COLORS["border"],
-        ),
-        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=14, color=COLORS["text"])),
+        legend=dict(bgcolor="rgba(0,0,0,0)"),
     )
     return fig
 
@@ -409,23 +382,13 @@ with tab1:
         x=df["Year"],
         y=df["Cumulative CF (MM$)"],
         mode="lines+markers",
-        name="Cumulative CF",
+        name="Cumulative CF after tax",
         line=dict(color=COLORS["curve"], width=3.5),
-        marker=dict(size=7, line=dict(width=1.5, color=COLORS["bg"])),
+        marker=dict(size=6, line=dict(width=1, color=COLORS["bg"])),
         fill="tozeroy",
         fillcolor=COLORS["fill"],
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra></extra>",
     ))
     fig.add_hline(y=0, line_dash="dash", line_color="gray")
-
-    # Clear value label on the final point
-    fig.add_annotation(
-        x=df["Year"].iloc[-1], y=cumulative_list[-1],
-        text=f"<b>{cumulative_list[-1]:,.1f}</b> MM$",
-        showarrow=True, arrowhead=0, ax=-40, ay=-30,
-        font=dict(size=15, color=COLORS["text"]),
-        bgcolor=COLORS["card_start"], bordercolor=COLORS["accent"], borderwidth=1.5, borderpad=5,
-    )
 
     if payback_years is not None:
         pb_exact = payback_years + payback_months / 12
@@ -435,30 +398,23 @@ with tab1:
             line_color="#34d399",
             annotation_text=f"Payback ≈ {payback_years}y {payback_months}m",
             annotation_position="top",
-            annotation_font=dict(size=14),
         )
 
     style_layout(fig, "Cumulative net cash flow after tax", "Year", "MM USD")
     st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
-    cf_vals = df["Net CF after Tax (MM$)"]
-    colors = [COLORS["bar_neg"] if v < 0 else COLORS["bar_pos"] for v in cf_vals]
+    colors = [COLORS["bar_neg"] if v < 0 else COLORS["bar_pos"] for v in df["Net CF after Tax (MM$)"]]
     fig2 = go.Figure()
     fig2.add_trace(go.Bar(
         x=df["Year"],
-        y=cf_vals,
+        y=df["Net CF after Tax (MM$)"],
         marker=dict(color=colors, line=dict(width=0)),
         name="Net CF after Tax",
-        text=[f"{v:,.1f}" for v in cf_vals] if show_labels else None,
-        textposition="outside",
-        textfont=dict(size=13, color=COLORS["text"]),
-        cliponaxis=False,
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra></extra>",
     ))
     fig2.add_hline(y=0, line_dash="dash", line_color="gray")
     style_layout(fig2, "Net cash flow after tax — year by year", "Year", "MM USD")
-    fig2.update_layout(bargap=0.28)
+    fig2.update_layout(bargap=0.25)
     st.plotly_chart(fig2, use_container_width=True)
 
 with tab3:
@@ -485,8 +441,7 @@ with tab3:
         mode="lines+markers",
         name="Current scenario",
         line=dict(color=COLORS["curve"], width=3.5),
-        marker=dict(size=7),
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra>Current</extra>",
+        marker=dict(size=6),
     ))
     fig3.add_trace(go.Scatter(
         x=list(range(project_life + 1)),
@@ -494,8 +449,7 @@ with tab3:
         mode="lines+markers",
         name="With inflation" if not apply_inflation else "Without inflation",
         line=dict(color="#f97316", width=3, dash="dash"),
-        marker=dict(size=7),
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra>Compare</extra>",
+        marker=dict(size=6),
     ))
     fig3.add_hline(y=0, line_dash="dash", line_color="gray")
     style_layout(fig3, "Comparison: impact of inflation on cumulative cash flow", "Year", "Cumulative CF (MM USD)")

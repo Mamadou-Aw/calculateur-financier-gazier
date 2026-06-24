@@ -14,7 +14,7 @@ import pandas as pd
 st.set_page_config(page_title="Petroleum Economics Simulator", page_icon="⛽", layout="wide")
 
 if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = False
+    st.session_state.dark_mode = True
 
 title_col, toggle_col = st.columns([5, 1])
 with toggle_col:
@@ -22,179 +22,34 @@ with toggle_col:
 
 if st.session_state.dark_mode:
     COLORS = dict(
-        bg="#0e1117",
-        bg_gradient="radial-gradient(1200px 600px at 80% -10%, #1b2433 0%, rgba(27,36,51,0) 60%), linear-gradient(180deg, #0e1117 0%, #0b0e14 100%)",
-        sidebar_bg="#141a23", card_start="#1a2230", card_end="#121823",
-        border="#28313f", text="#f1f5f9", muted="#94a3b8", template="plotly_dark",
-        accent="#38bdf8", accent2="#818cf8",
-        curve="#e2e8f0", fill="rgba(56,189,248,0.10)",
-        bar_pos="#38bdf8", bar_neg="#fb7185",
-        grid="rgba(255,255,255,0.06)",
-        shadow="0 6px 24px rgba(0,0,0,0.45)",
-        shadow_hover="0 12px 34px rgba(56,189,248,0.22)",
+        bg="#0e1117", sidebar_bg="#161b22", card_start="#1a2332", card_end="#0e1117",
+        border="#2d3748", text="#fafafa", template="plotly_dark",
+        curve="#ffffff", fill="rgba(255,255,255,0.06)", bar_pos="#ffffff",
     )
 else:
     COLORS = dict(
-        bg="#e9edf4",
-        bg_gradient="linear-gradient(180deg, #eef2f8 0%, #e3e8f1 100%)",
-        sidebar_bg="#f3f6fb", card_start="#ffffff", card_end="#f6f9fe",
-        border="#d2dae7", text="#1f2937", muted="#566175", template="plotly_white",
-        accent="#2563eb", accent2="#7c3aed",
-        curve="#1d4ed8", fill="rgba(37,99,235,0.10)",
-        bar_pos="#2563eb", bar_neg="#e11d48",
-        grid="rgba(31,41,55,0.08)",
-        shadow="0 6px 22px rgba(31,41,55,0.10)",
-        shadow_hover="0 14px 34px rgba(37,99,235,0.20)",
+        bg="#ffffff", sidebar_bg="#f0f2f6", card_start="#f5f7fa", card_end="#ffffff",
+        border="#d0d7de", text="#0e1117", template="plotly_white",
+        curve="#0e1117", fill="rgba(14,17,23,0.06)", bar_pos="#0e1117",
     )
 
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-    html, body, .stApp, [class*="css"] {{
-        font-family: 'Inter', -apple-system, sans-serif;
-    }}
-
     .stApp {{
-        background: {COLORS['bg_gradient']};
-        background-attachment: fixed;
+        background-color: {COLORS['bg']};
         color: {COLORS['text']};
     }}
-
-    /* ---- FORCE readable text (beats Streamlit's base theme) ---- */
-    .stApp, .stApp p, .stApp span, .stApp li, .stApp label,
-    .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6,
-    .stApp div[data-testid="stMarkdownContainer"],
-    section[data-testid="stSidebar"] *,
-    .stApp [data-testid="stWidgetLabel"],
-    .stApp [data-testid="stCaptionContainer"] {{
-        color: {COLORS['text']} !important;
-    }}
-
-    h1 {{
-        font-weight: 800;
-        letter-spacing: -0.8px;
-    }}
-    h2, h3 {{ letter-spacing: -0.3px; }}
-
-    /* ---- Metric cards ---- */
     .stMetric {{
         background: linear-gradient(135deg, {COLORS['card_start']} 0%, {COLORS['card_end']} 100%);
         border: 1px solid {COLORS['border']};
-        border-radius: 16px;
-        padding: 18px 22px;
-        box-shadow: {COLORS['shadow']};
-        position: relative;
-        overflow: hidden;
-        transition: transform .22s ease, box-shadow .22s ease;
+        border-radius: 12px;
+        padding: 16px 20px;
     }}
-    .stMetric::before {{
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, {COLORS['accent']}, {COLORS['accent2']});
-        opacity: 0.9;
-    }}
-    .stMetric:hover {{
-        transform: translateY(-4px);
-        box-shadow: {COLORS['shadow_hover']};
-    }}
-    div[data-testid="stMetricValue"] {{
-        font-size: 27px;
-        font-weight: 700;
-        color: {COLORS['text']} !important;
-    }}
-    div[data-testid="stMetricLabel"] p {{
-        color: {COLORS['muted']} !important;
-        font-weight: 600;
-        font-size: 13px;
-        letter-spacing: 0.2px;
-    }}
-
-    /* ---- Sidebar ---- */
+    div[data-testid="stMetricValue"] {{ font-size: 26px; font-weight: 700; }}
     section[data-testid="stSidebar"] {{
-        background: {COLORS['sidebar_bg']};
+        background-color: {COLORS['sidebar_bg']};
         border-right: 1px solid {COLORS['border']};
     }}
-    section[data-testid="stSidebar"] .stMetric {{ box-shadow: none; }}
-
-    /* ---- Tabs ---- */
-    .stTabs [data-baseweb="tab"] {{
-        font-weight: 600;
-        color: {COLORS['muted']};
-    }}
-    .stTabs [aria-selected="true"] {{
-        color: {COLORS['accent']} !important;
-    }}
-    .stTabs [data-baseweb="tab-highlight"] {{
-        background-color: {COLORS['accent']} !important;
-        height: 3px;
-        border-radius: 3px;
-    }}
-
-    /* ---- Buttons ---- */
-    .stDownloadButton button, .stButton button {{
-        border-radius: 12px;
-        border: 1px solid {COLORS['border']};
-        font-weight: 600;
-        transition: all .2s ease;
-    }}
-    .stDownloadButton button:hover, .stButton button:hover {{
-        border-color: {COLORS['accent']};
-        color: {COLORS['accent']};
-        transform: translateY(-1px);
-        box-shadow: {COLORS['shadow_hover']};
-    }}
-
-    /* ---- Expander ---- */
-    details, .streamlit-expanderHeader {{
-        border-radius: 12px !important;
-    }}
-    [data-testid="stExpander"] {{
-        border: 1px solid {COLORS['border']};
-        border-radius: 14px;
-        box-shadow: {COLORS['shadow']};
-        overflow: hidden;
-        background: {COLORS['card_start']};
-    }}
-
-    /* ---- Inputs: number fields, text, selects ---- */
-    .stNumberInput input, .stTextInput input, .stTextArea textarea {{
-        background-color: {COLORS['card_start']} !important;
-        color: {COLORS['text']} !important;
-        border: 1px solid {COLORS['border']} !important;
-        border-radius: 10px !important;
-    }}
-    .stNumberInput button {{
-        background-color: {COLORS['card_end']} !important;
-        color: {COLORS['text']} !important;
-        border-color: {COLORS['border']} !important;
-    }}
-    div[data-baseweb="input"], div[data-baseweb="base-input"] {{
-        background-color: {COLORS['card_start']} !important;
-        border-radius: 10px !important;
-    }}
-
-    /* ---- Sliders ---- */
-    .stSlider [data-baseweb="slider"] div[role="slider"] {{
-        background-color: {COLORS['accent']} !important;
-    }}
-    .stSlider [data-testid="stTickBar"] {{ background: {COLORS['border']} !important; }}
-
-    /* ---- Checkboxes / toggle ---- */
-    .stCheckbox p, .stToggle p {{ color: {COLORS['text']} !important; }}
-
-    /* ---- Dataframe ---- */
-    [data-testid="stDataFrame"] {{
-        border: 1px solid {COLORS['border']};
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: {COLORS['shadow']};
-    }}
-
-    /* ---- Dividers softer ---- */
-    hr {{ border-color: {COLORS['border']} !important; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -347,53 +202,6 @@ c5.metric("Annual Revenue (MM$)", f"{total_revenue:.3f}")
 st.divider()
 
 # -----------------------------------------------------------------------
-# CHART HELPERS
-# -----------------------------------------------------------------------
-# Spread out year ticks so labels never collide on long projects.
-if project_life <= 15:
-    tick_step = 1
-elif project_life <= 30:
-    tick_step = 2
-else:
-    tick_step = 5
-
-# Only print value labels directly on charts when there's room for them.
-show_labels = project_life <= 25
-
-
-def style_layout(fig, title, xlabel, ylabel):
-    fig.update_layout(
-        template=COLORS["template"],
-        height=480,
-        title=dict(text=title, font=dict(size=20, color=COLORS["text"])),
-        font=dict(family="Inter, sans-serif", color=COLORS["text"], size=14),
-        xaxis=dict(
-            title=dict(text=xlabel, font=dict(size=15, color=COLORS["text"])),
-            tickfont=dict(size=14, color=COLORS["text"]),
-            gridcolor=COLORS["grid"], zeroline=False,
-            dtick=tick_step, tick0=0,
-            showline=True, linecolor=COLORS["grid"], linewidth=1,
-        ),
-        yaxis=dict(
-            title=dict(text=ylabel, font=dict(size=15, color=COLORS["text"])),
-            tickfont=dict(size=14, color=COLORS["text"]),
-            gridcolor=COLORS["grid"], zeroline=False,
-            tickformat=",.1f", ticksuffix="  ", separatethousands=True,
-        ),
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        margin=dict(t=72, l=72, r=30, b=56),
-        hovermode="x unified",
-        hoverlabel=dict(
-            font=dict(size=15, family="Inter, sans-serif", color=COLORS["text"]),
-            bgcolor=COLORS["card_start"], bordercolor=COLORS["border"],
-        ),
-        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=14, color=COLORS["text"])),
-    )
-    return fig
-
-
-# -----------------------------------------------------------------------
 # CHARTS
 # -----------------------------------------------------------------------
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -409,23 +217,13 @@ with tab1:
         x=df["Year"],
         y=df["Cumulative CF (MM$)"],
         mode="lines+markers",
-        name="Cumulative CF",
-        line=dict(color=COLORS["curve"], width=3.5),
-        marker=dict(size=7, line=dict(width=1.5, color=COLORS["bg"])),
+        name="Cumulative CF after tax",
+        line=dict(color=COLORS["curve"], width=3),
+        marker=dict(size=5),
         fill="tozeroy",
         fillcolor=COLORS["fill"],
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra></extra>",
     ))
     fig.add_hline(y=0, line_dash="dash", line_color="gray")
-
-    # Clear value label on the final point
-    fig.add_annotation(
-        x=df["Year"].iloc[-1], y=cumulative_list[-1],
-        text=f"<b>{cumulative_list[-1]:,.1f}</b> MM$",
-        showarrow=True, arrowhead=0, ax=-40, ay=-30,
-        font=dict(size=15, color=COLORS["text"]),
-        bgcolor=COLORS["card_start"], bordercolor=COLORS["accent"], borderwidth=1.5, borderpad=5,
-    )
 
     if payback_years is not None:
         pb_exact = payback_years + payback_months / 12
@@ -435,30 +233,38 @@ with tab1:
             line_color="#34d399",
             annotation_text=f"Payback ≈ {payback_years}y {payback_months}m",
             annotation_position="top",
-            annotation_font=dict(size=14),
         )
 
-    style_layout(fig, "Cumulative net cash flow after tax", "Year", "MM USD")
+    fig.update_layout(
+        template=COLORS["template"],
+        height=450,
+        title="Cumulative net cash flow after tax",
+        xaxis_title="Year",
+        yaxis_title="MM USD",
+        plot_bgcolor=COLORS["bg"],
+        paper_bgcolor=COLORS["bg"],
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
-    cf_vals = df["Net CF after Tax (MM$)"]
-    colors = [COLORS["bar_neg"] if v < 0 else COLORS["bar_pos"] for v in cf_vals]
+    colors = ["#ef4444" if v < 0 else COLORS["bar_pos"] for v in df["Net CF after Tax (MM$)"]]
     fig2 = go.Figure()
     fig2.add_trace(go.Bar(
         x=df["Year"],
-        y=cf_vals,
-        marker=dict(color=colors, line=dict(width=0)),
+        y=df["Net CF after Tax (MM$)"],
+        marker_color=colors,
         name="Net CF after Tax",
-        text=[f"{v:,.1f}" for v in cf_vals] if show_labels else None,
-        textposition="outside",
-        textfont=dict(size=13, color=COLORS["text"]),
-        cliponaxis=False,
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra></extra>",
     ))
     fig2.add_hline(y=0, line_dash="dash", line_color="gray")
-    style_layout(fig2, "Net cash flow after tax — year by year", "Year", "MM USD")
-    fig2.update_layout(bargap=0.28)
+    fig2.update_layout(
+        template=COLORS["template"],
+        height=450,
+        title="Net cash flow after tax — year by year",
+        xaxis_title="Year",
+        yaxis_title="MM USD",
+        plot_bgcolor=COLORS["bg"],
+        paper_bgcolor=COLORS["bg"],
+    )
     st.plotly_chart(fig2, use_container_width=True)
 
 with tab3:
@@ -484,9 +290,7 @@ with tab3:
         y=cumulative_list,
         mode="lines+markers",
         name="Current scenario",
-        line=dict(color=COLORS["curve"], width=3.5),
-        marker=dict(size=7),
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra>Current</extra>",
+        line=dict(color=COLORS["curve"], width=3),
     ))
     fig3.add_trace(go.Scatter(
         x=list(range(project_life + 1)),
@@ -494,11 +298,17 @@ with tab3:
         mode="lines+markers",
         name="With inflation" if not apply_inflation else "Without inflation",
         line=dict(color="#f97316", width=3, dash="dash"),
-        marker=dict(size=7),
-        hovertemplate="Year %{x}: <b>%{y:,.2f}</b> MM$<extra>Compare</extra>",
     ))
     fig3.add_hline(y=0, line_dash="dash", line_color="gray")
-    style_layout(fig3, "Comparison: impact of inflation on cumulative cash flow", "Year", "Cumulative CF (MM USD)")
+    fig3.update_layout(
+        template=COLORS["template"],
+        height=450,
+        title="Comparison: impact of inflation on cumulative cash flow",
+        xaxis_title="Year",
+        yaxis_title="Cumulative CF (MM USD)",
+        plot_bgcolor=COLORS["bg"],
+        paper_bgcolor=COLORS["bg"],
+    )
     st.plotly_chart(fig3, use_container_width=True)
 
 with tab4:
